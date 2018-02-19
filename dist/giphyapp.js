@@ -75,13 +75,16 @@ require = (function (modules, cache, entry) {
 var giphyUrl = "http://api.giphy.com/v1/gifs/search?q";
 var apikey = "vw4usscjAkDQiPbUvnGdRJfpEUWqZsuY";
 
+var urlParams = new URLSearchParams(window.location.search);
+var urlParam = urlParams.get("q");
+
 var formElement = document.querySelector("#form");
 var gifDisplay = document.querySelector(".results");
-var urlParams = new URLSearchParams(window.location.search);
+var favorites = [];
+var gifIds = [];
 
 //Loading
 window.onload = function (e) {
-  var urlParam = urlParams.get('q');
   if (urlParam) {
     searching(urlParam, e);
   }
@@ -91,21 +94,48 @@ window.onload = function (e) {
 formElement.addEventListener("submit", function (e) {
   var inputText = e.target[0].value;
   searching(inputText, e);
-  urlParams == undefined ? urlParams.set('q', inputText) : window.location.href += "?q=" + inputText;
+  if (urlParam != null) {
+    urlParams.set("q", inputText);
+    window.location.search = "?q=" + inputText;
+  } else {
+    window.location.href += "?q=" + inputText;
+  }
 });
 
 searching = function searching(searchedText, e) {
   var url = giphyUrl + "=" + searchedText + "&api_key=" + apikey;
   fetch(url).then(function (response) {
     response.json().then(function (data) {
-      while (gifDisplay.firstChild) {
-        gifDisplay.removeChild(gifDisplay.firstChild);
-      }
-      for (var i = 0; i < data.data.length; i++) {
-        var image = document.createElement('img');
-        image.setAttribute('src', data.data[i].images.fixed_width.url);
-        image.setAttribute('alt', data.data[i].slug);
-        gifDisplay.appendChild(image);
+      if (data.data.length) {
+        while (gifDisplay.firstChild) {
+          gifDisplay.removeChild(gifDisplay.firstChild);
+        }
+        for (var i = 0; i < data.data.length; i++) {
+          var imageDiv = document.createElement("div");
+          var image = document.createElement("img");
+          var imageModal = document.createElement("div");
+          var favButton = document.createElement("p");
+          var favText = document.createTextNode("fav");
+          var linkButton = document.createElement("a");
+          var linkText = document.createTextNode("Link");
+          linkButton.setAttribute("href", data.data[i].url);
+          imageDiv.setAttribute("class", "imageContainer");
+          imageModal.setAttribute("class", "imgModal");
+          favButton.setAttribute("id", data.data[i].id);
+          image.setAttribute("src", data.data[i].images.fixed_width.url);
+          image.setAttribute("class", data.data[i].id);
+          image.setAttribute("alt", data.data[i].slug);
+          favButton.appendChild(favText);
+          linkButton.appendChild(linkText);
+          imageModal.appendChild(favButton);
+          imageModal.appendChild(linkButton);
+          imageDiv.appendChild(imageModal);
+          imageDiv.appendChild(image);
+          gifDisplay.appendChild(imageDiv);
+          gifIds.push(data.data[i].id);
+        }
+      } else {
+        console.log("Aucun resultat");
       }
     });
   }).catch(function (error) {
@@ -113,7 +143,65 @@ searching = function searching(searchedText, e) {
   });
   e.preventDefault();
 };
-},{}],20:[function(require,module,exports) {
+
+//Add to favorite
+gifDisplay.addEventListener("click", function (e) {
+  var favId = e.target.getAttribute("id");
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = gifIds[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      ids = _step.value;
+
+      if (favId == ids) {
+        var _iteratorNormalCompletion2 = true;
+        var _didIteratorError2 = false;
+        var _iteratorError2 = undefined;
+
+        try {
+          for (var _iterator2 = favorites[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            favs = _step2.value;
+
+            if (favs === favId) {
+              //unfavorite the id
+            } else {
+              favorites.push(favId);
+            }
+          }
+        } catch (err) {
+          _didIteratorError2 = true;
+          _iteratorError2 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+              _iterator2.return();
+            }
+          } finally {
+            if (_didIteratorError2) {
+              throw _iteratorError2;
+            }
+          }
+        }
+      }
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+});
+},{}],13:[function(require,module,exports) {
 
 var global = (1, eval)('this');
 var OldModule = module.bundle.Module;
@@ -135,7 +223,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '51988' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '54431' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -236,5 +324,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.require, id);
   });
 }
-},{}]},{},[20,6])
+},{}]},{},[13,6])
 //# sourceMappingURL=/dist/giphyapp.map
