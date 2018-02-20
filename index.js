@@ -6,8 +6,6 @@ let urlParam = urlParams.get("q");
 
 let formElement = document.querySelector("#form");
 let gifDisplay = document.querySelector(".results");
-let favorites = [];
-let gifIds = [];
 
 //Loading
 window.onload = e => {
@@ -59,7 +57,6 @@ searching = (searchedText, e) => {
             imageDiv.appendChild(imageModal);
             imageDiv.appendChild(image);
             gifDisplay.appendChild(imageDiv);
-            gifIds.push(data.data[i].id);
           }
         } else {
           console.log("Aucun resultat");
@@ -73,15 +70,13 @@ searching = (searchedText, e) => {
 //Add to favorite
 gifDisplay.addEventListener("click", e => {
   let favId = e.target.getAttribute("id");
-  for (ids of gifIds) {
-    if (favId == ids) {
-      for (favs of favorites) {
-        if (favs === favId) {
-          //unfavorite the id
-        } else {
-          favorites.push(favId);
-        }
-      }
+  let favUrl = document.getElementsByClassName(favId)[0].currentSrc;
+  let favs = localStorage.getItem(favId);
+  if (favId !== undefined) {
+    if (favs !== null) {
+      localStorage.removeItem(favId);
+    } else {
+      localStorage.setItem(favId, favUrl);
     }
   }
 });

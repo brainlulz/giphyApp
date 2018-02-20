@@ -71,7 +71,7 @@ require = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({6:[function(require,module,exports) {
+})({3:[function(require,module,exports) {
 var giphyUrl = "http://api.giphy.com/v1/gifs/search?q";
 var apikey = "vw4usscjAkDQiPbUvnGdRJfpEUWqZsuY";
 
@@ -80,8 +80,6 @@ var urlParam = urlParams.get("q");
 
 var formElement = document.querySelector("#form");
 var gifDisplay = document.querySelector(".results");
-var favorites = [];
-var gifIds = [];
 
 //Loading
 window.onload = function (e) {
@@ -132,7 +130,6 @@ searching = function searching(searchedText, e) {
           imageDiv.appendChild(imageModal);
           imageDiv.appendChild(image);
           gifDisplay.appendChild(imageDiv);
-          gifIds.push(data.data[i].id);
         }
       } else {
         console.log("Aucun resultat");
@@ -147,61 +144,17 @@ searching = function searching(searchedText, e) {
 //Add to favorite
 gifDisplay.addEventListener("click", function (e) {
   var favId = e.target.getAttribute("id");
-  var _iteratorNormalCompletion = true;
-  var _didIteratorError = false;
-  var _iteratorError = undefined;
-
-  try {
-    for (var _iterator = gifIds[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-      ids = _step.value;
-
-      if (favId == ids) {
-        var _iteratorNormalCompletion2 = true;
-        var _didIteratorError2 = false;
-        var _iteratorError2 = undefined;
-
-        try {
-          for (var _iterator2 = favorites[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-            favs = _step2.value;
-
-            if (favs === favId) {
-              //unfavorite the id
-            } else {
-              favorites.push(favId);
-            }
-          }
-        } catch (err) {
-          _didIteratorError2 = true;
-          _iteratorError2 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion2 && _iterator2.return) {
-              _iterator2.return();
-            }
-          } finally {
-            if (_didIteratorError2) {
-              throw _iteratorError2;
-            }
-          }
-        }
-      }
-    }
-  } catch (err) {
-    _didIteratorError = true;
-    _iteratorError = err;
-  } finally {
-    try {
-      if (!_iteratorNormalCompletion && _iterator.return) {
-        _iterator.return();
-      }
-    } finally {
-      if (_didIteratorError) {
-        throw _iteratorError;
-      }
+  var favUrl = document.getElementsByClassName(favId)[0].currentSrc;
+  var favs = localStorage.getItem(favId);
+  if (favId !== undefined) {
+    if (favs !== null) {
+      localStorage.removeItem(favId);
+    } else {
+      localStorage.setItem(favId, favUrl);
     }
   }
 });
-},{}],13:[function(require,module,exports) {
+},{}],14:[function(require,module,exports) {
 
 var global = (1, eval)('this');
 var OldModule = module.bundle.Module;
@@ -223,7 +176,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '54431' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '49413' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -324,5 +277,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.require, id);
   });
 }
-},{}]},{},[13,6])
+},{}]},{},[14,3])
 //# sourceMappingURL=/dist/giphyapp.map
