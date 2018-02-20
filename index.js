@@ -6,9 +6,14 @@ let urlParam = urlParams.get("q");
 
 let formElement = document.querySelector("#form");
 let gifDisplay = document.querySelector(".results");
+let favoritedBtn = document.querySelector(".favoris");
+let gifInfos = [];
 
 //Loading
 window.onload = e => {
+  if (window.location.pathname == "/favorited") {
+    favorited();
+  }
   if (urlParam) {
     searching(urlParam, e);
   }
@@ -16,7 +21,8 @@ window.onload = e => {
 
 //search
 formElement.addEventListener("submit", e => {
-  let inputText = e.target[0].value;
+  let inputText = e.target[1].value;
+  history.pushState(null, '', '/');
   searching(inputText, e);
   if (urlParam != null) {
     urlParams.set("q", inputText);
@@ -45,8 +51,9 @@ searching = (searchedText, e) => {
             let linkText = document.createTextNode("Link");
             linkButton.setAttribute("href", data.data[i].url);
             imageDiv.setAttribute("class", "imageContainer");
+            imageDiv.setAttribute("id", data.data[i].id);
             imageModal.setAttribute("class", "imgModal");
-            favButton.setAttribute("id", data.data[i].id);
+            favButton.setAttribute("class", data.data[i].id);
             image.setAttribute("src", data.data[i].images.fixed_width.url);
             image.setAttribute("class", data.data[i].id);
             image.setAttribute("alt", data.data[i].slug);
@@ -57,7 +64,16 @@ searching = (searchedText, e) => {
             imageDiv.appendChild(imageModal);
             imageDiv.appendChild(image);
             gifDisplay.appendChild(imageDiv);
+            gifInfos.push({
+              id: data.data[i].id,
+              href: data.data[i].url,
+              src: data.data[i].images.fixed_width.url,
+              alt: data.data[i].slug
+            });
           }
+          let nbrResults = document.createElement('p').createTextNode(`${data.data.length} results`);
+          let nbrResultElement = document.querySelector(".nbrResults");
+          nbrResultElement.appendChild(nbrResults);
         } else {
           console.log("Aucun resultat");
         }
@@ -69,14 +85,63 @@ searching = (searchedText, e) => {
 
 //Add to favorite
 gifDisplay.addEventListener("click", e => {
-  let favId = e.target.getAttribute("id");
-  let favUrl = document.getElementsByClassName(favId)[0].currentSrc;
+  let favId = e.target.getAttribute("class");
+  let favImg = document.getElementsByClassName(favId)[1]
+  let favUrl = document.getElementsByClassName(favId)[0].getAttribute("src");
   let favs = localStorage.getItem(favId);
   if (favId !== undefined) {
     if (favs !== null) {
+      if (window.location.pathname === "/favorited") {
+        let rmvGif = document.getElementById(favId);
+        gifDisplay.removeChild(rmvGif);
+      }
       localStorage.removeItem(favId);
+      favImg.classList.remove("favorited");
     } else {
-      localStorage.setItem(favId, favUrl);
+      for (let i = 0; i < gifInfos.length; i++) {
+        if (favId == gifInfos[i].id) {
+          localStorage.setItem(favId, JSON.stringify(gifInfos[i]));
+          favImg.classList.add("favorited");
+        }
+      }
     }
   }
 });
+
+favoritedBtn.addEventListener("click", e => {
+  history.pushState(null, '', '/favorited');
+  while (gifDisplay.firstChild) {
+    gifDisplay.removeChild(gifDisplay.firstChild);
+  }
+  favorited();
+});
+
+function favorited() {
+  for (let i = 0; i < localStorage.length; i++) {
+    let favItemId = localStorage.key(i);
+    let objectGif = localStorage.getItem(favItemId);
+    let imageDiv = document.createElement("div");
+    let image = document.createElement("img");
+    let imageModal = document.createElement("div");
+    let favButton = document.createElement("p");
+    let favText = document.createTextNode("fav");
+    let linkButton = document.createElement("a");
+    let linkText = document.createTextNode("Link");
+    let FavGifInfos = JSON.parse(objectGif);
+    linkButton.setAttribute("href", FavGifInfos.href);
+    imageDiv.setAttribute("id", FavGifInfos.id);
+    imageDiv.setAttribute("class", "imageContainer");
+    imageModal.setAttribute("class", "imgModal");
+    favButton.setAttribute("class", favItemId);
+    image.setAttribute("src", FavGifInfos.src);
+    image.setAttribute("class", `${favItemId} favorited`);
+    image.setAttribute("alt", FavGifInfos.alt);
+    favButton.appendChild(favText);
+    linkButton.appendChild(linkText);
+    imageModal.appendChild(favButton);
+    imageModal.appendChild(linkButton);
+    imageDiv.appendChild(imageModal);
+    imageDiv.appendChild(image);
+    gifDisplay.appendChild(imageDiv);
+  }
+}
