@@ -38,6 +38,15 @@ body {
   }
 }
 
+.favBtn {
+  background-image: url("https://image.noelshack.com/fichiers/2018/08/3/1519202082-export-2.png");
+  display: inline-block;
+  width: 3rem;
+  height: 3rem;
+  background-size: 100%;
+  z-index: 2;
+}
+
 .search {
   grid-row: 2/2;
   grid-column: 2/2;
@@ -98,7 +107,10 @@ body {
     visibility: hidden;
     position: absolute;
     z-index: 1;
-    background: rgba(245, 245, 245, 0.7);	
+    background: rgba(245, 245, 245, 0.7);
+    display: grid;
+    justify-content: center;
+    align-items: center;
     p {
       z-index: 2;
       cursor: default;
@@ -116,12 +128,11 @@ body {
   display: inline-block;
   background-image: url('https://image.noelshack.com/fichiers/2018/08/2/1519144250-loupe.png');
   background-size: 100%;
-  margin: 0.6rem 0.3rem 0.5rem 0.5rem;
+  margin: 0.8rem 0.3rem 0.5rem 0.5rem;
   width: 1rem;
   height: 1rem;
   background-repeat: no-repeat;
   position: absolute;
-  outline: none;
   border: none;
   z-index: 1;
   &:hover {
@@ -134,25 +145,9 @@ input {
   border: 5px $titleColor solid;
   background: transparent;
   width: 15.5rem;
-  height: 1.5rem;
+  height: 2.5rem;
   padding-right: 1.5rem;
   padding-left: 1.5rem;
   position: relative;
   overflow: auto;
-}
-
-
-.deleteValue {
-  display: inline-block;
-  position: absolute;
-  background: transparent;
-  background-size: 100%;
-  width: 1rem;
-  height: 1rem;
-  outline: none;
-  border: none;
-  z-index: 1;
-  &:hover {
-    cursor: default;
-  }
 }

@@ -1,3 +1,5 @@
+import './toto';
+
 const giphyUrl = "http://api.giphy.com/v1/gifs/search?q";
 const apikey = "vw4usscjAkDQiPbUvnGdRJfpEUWqZsuY";
 
@@ -11,18 +13,22 @@ let gifInfos = [];
 
 //Loading
 window.onload = e => {
-  if (window.location.pathname == "/favorited") {
+  if (window.location.pathname === "/favorited") {
     favorited();
-  }
-  if (urlParam) {
-    searching(urlParam, e);
+  } else {
+    if (urlParam) {
+      searching(urlParam, e);
+      formElement
+        .querySelector("input")
+        .setAttribute("value", urlParam);
+    }
   }
 };
 
 //search
 formElement.addEventListener("submit", e => {
   let inputText = e.target[1].value;
-  history.pushState(null, '', '/');
+  history.pushState(null, "", "/");
   searching(inputText, e);
   if (urlParam != null) {
     urlParams.set("q", inputText);
@@ -36,48 +42,61 @@ searching = (searchedText, e) => {
   let url = `${giphyUrl}=${searchedText}&api_key=${apikey}`;
   fetch(url)
     .then(response => {
-      response.json().then(data => {
-        if (data.data.length) {
-          while (gifDisplay.firstChild) {
-            gifDisplay.removeChild(gifDisplay.firstChild);
-          }
-          for (let i = 0; i < data.data.length; i++) {
-            let imageDiv = document.createElement("div");
-            let image = document.createElement("img");
-            let imageModal = document.createElement("div");
-            let favButton = document.createElement("p");
-            let favText = document.createTextNode("fav");
-            let linkButton = document.createElement("a");
-            let linkText = document.createTextNode("Link");
-            linkButton.setAttribute("href", data.data[i].url);
-            imageDiv.setAttribute("class", "imageContainer");
-            imageDiv.setAttribute("id", data.data[i].id);
-            imageModal.setAttribute("class", "imgModal");
-            favButton.setAttribute("class", data.data[i].id);
-            image.setAttribute("src", data.data[i].images.fixed_width.url);
-            image.setAttribute("class", data.data[i].id);
-            image.setAttribute("alt", data.data[i].slug);
-            favButton.appendChild(favText);
-            linkButton.appendChild(linkText);
-            imageModal.appendChild(favButton);
-            imageModal.appendChild(linkButton);
-            imageDiv.appendChild(imageModal);
-            imageDiv.appendChild(image);
-            gifDisplay.appendChild(imageDiv);
-            gifInfos.push({
-              id: data.data[i].id,
-              href: data.data[i].url,
-              src: data.data[i].images.fixed_width.url,
-              alt: data.data[i].slug
-            });
-          }
-          let nbrResults = document.createElement('p').createTextNode(`${data.data.length} results`);
-          let nbrResultElement = document.querySelector(".nbrResults");
-          nbrResultElement.appendChild(nbrResults);
-        } else {
-          console.log("Aucun resultat");
+      return response.json()
+    })
+    .then(data => {
+      if (data.data.length) {
+        while (gifDisplay.firstChild) {
+          gifDisplay.removeChild(gifDisplay.firstChild);
         }
-      });
+        for (let i = 0; i < data.data.length; i++) {
+          let imageDiv = document.createElement("div");
+          let image = document.createElement("img");
+          let imageModal = document.createElement("div");
+          let favButton = document.createElement("p");
+          let favText = document.createTextNode("");
+          let linkButton = document.createElement("a");
+          let linkText = document.createTextNode("Link");
+          linkButton.setAttribute("href", data.data[i].url);
+          imageDiv.setAttribute("class", "imageContainer");
+          imageDiv.setAttribute("id", data.data[i].id);
+          imageModal.setAttribute("class", "imgModal");
+          favButton.setAttribute("class", `${data.data[i].id} favBtn`);
+          image.setAttribute("src", data.data[i].images.fixed_width.url);
+          image.setAttribute("class", data.data[i].id);
+          image.setAttribute("alt", data.data[i].slug);
+          favButton.appendChild(favText);
+          linkButton.appendChild(linkText);
+          imageModal.appendChild(favButton);
+          imageModal.appendChild(linkButton);
+          imageDiv.appendChild(imageModal);
+          imageDiv.appendChild(image);
+          gifDisplay.appendChild(imageDiv);
+          gifInfos.push({
+            id: data.data[i].id,
+            href: data.data[i].url,
+            src: data.data[i].images.fixed_width.url,
+            alt: data.data[i].slug
+          });
+        }
+      } else {
+        return Promise.reject("Aucun resultat");
+      }
+      let nbrResults = document.createElement("p");
+      let nbrResultsText = document.createTextNode(
+        `${data.data.length} results`
+      );
+      nbrResults.appendChild(nbrResultsText);
+      let nbrResultElement = document.querySelector(".nbrResults");
+      nbrResultElement.appendChild(nbrResults);
+      if (localStorage.length > 0) {
+        for (let i = 0; i < localStorage.length; i++) {
+          let favoritedGifId = localStorage.key(i);
+          let favoritedGif = document.getElementById(favoritedGifId);
+          favoritedGif.querySelector('img').classList.add("favorited");
+        }
+      }
+        
     })
     .catch(error => console.log(error));
   e.preventDefault();
@@ -85,9 +104,8 @@ searching = (searchedText, e) => {
 
 //Add to favorite
 gifDisplay.addEventListener("click", e => {
-  let favId = e.target.getAttribute("class");
-  let favImg = document.getElementsByClassName(favId)[1]
-  let favUrl = document.getElementsByClassName(favId)[0].getAttribute("src");
+  let favId = e.target.getAttribute("class").split(" ")[0];
+  let favImg = document.getElementsByClassName(favId)[1];
   let favs = localStorage.getItem(favId);
   if (favId !== undefined) {
     if (favs !== null) {
@@ -109,7 +127,7 @@ gifDisplay.addEventListener("click", e => {
 });
 
 favoritedBtn.addEventListener("click", e => {
-  history.pushState(null, '', '/favorited');
+  history.pushState(null, "", "/favorited");
   while (gifDisplay.firstChild) {
     gifDisplay.removeChild(gifDisplay.firstChild);
   }
@@ -124,7 +142,7 @@ function favorited() {
     let image = document.createElement("img");
     let imageModal = document.createElement("div");
     let favButton = document.createElement("p");
-    let favText = document.createTextNode("fav");
+    let favText = document.createTextNode("");
     let linkButton = document.createElement("a");
     let linkText = document.createTextNode("Link");
     let FavGifInfos = JSON.parse(objectGif);
@@ -132,7 +150,7 @@ function favorited() {
     imageDiv.setAttribute("id", FavGifInfos.id);
     imageDiv.setAttribute("class", "imageContainer");
     imageModal.setAttribute("class", "imgModal");
-    favButton.setAttribute("class", favItemId);
+    favButton.setAttribute("class", `${favItemId} favBtn`);
     image.setAttribute("src", FavGifInfos.src);
     image.setAttribute("class", `${favItemId} favorited`);
     image.setAttribute("alt", FavGifInfos.alt);
@@ -145,3 +163,5 @@ function favorited() {
     gifDisplay.appendChild(imageDiv);
   }
 }
+
+function favoritedGifBorder() {}

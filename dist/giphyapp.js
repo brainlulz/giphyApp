@@ -71,7 +71,13 @@ require = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({6:[function(require,module,exports) {
+})({22:[function(require,module,exports) {
+alert('TOTO');
+},{}],6:[function(require,module,exports) {
+"use strict";
+
+require("./toto");
+
 var giphyUrl = "http://api.giphy.com/v1/gifs/search?q";
 var apikey = "vw4usscjAkDQiPbUvnGdRJfpEUWqZsuY";
 
@@ -85,18 +91,20 @@ var gifInfos = [];
 
 //Loading
 window.onload = function (e) {
-  if (window.location.pathname == "/favorited") {
+  if (window.location.pathname === "/favorited") {
     favorited();
-  }
-  if (urlParam) {
-    searching(urlParam, e);
+  } else {
+    if (urlParam) {
+      searching(urlParam, e);
+      formElement.querySelector("input").setAttribute("value", urlParam);
+    }
   }
 };
 
 //search
 formElement.addEventListener("submit", function (e) {
   var inputText = e.target[1].value;
-  history.pushState(null, '', '/');
+  history.pushState(null, "", "/");
   searching(inputText, e);
   if (urlParam != null) {
     urlParams.set("q", inputText);
@@ -109,48 +117,57 @@ formElement.addEventListener("submit", function (e) {
 searching = function searching(searchedText, e) {
   var url = giphyUrl + "=" + searchedText + "&api_key=" + apikey;
   fetch(url).then(function (response) {
-    response.json().then(function (data) {
-      if (data.data.length) {
-        while (gifDisplay.firstChild) {
-          gifDisplay.removeChild(gifDisplay.firstChild);
-        }
-        for (var i = 0; i < data.data.length; i++) {
-          var imageDiv = document.createElement("div");
-          var image = document.createElement("img");
-          var imageModal = document.createElement("div");
-          var favButton = document.createElement("p");
-          var favText = document.createTextNode("fav");
-          var linkButton = document.createElement("a");
-          var linkText = document.createTextNode("Link");
-          linkButton.setAttribute("href", data.data[i].url);
-          imageDiv.setAttribute("class", "imageContainer");
-          imageDiv.setAttribute("id", data.data[i].id);
-          imageModal.setAttribute("class", "imgModal");
-          favButton.setAttribute("class", data.data[i].id);
-          image.setAttribute("src", data.data[i].images.fixed_width.url);
-          image.setAttribute("class", data.data[i].id);
-          image.setAttribute("alt", data.data[i].slug);
-          favButton.appendChild(favText);
-          linkButton.appendChild(linkText);
-          imageModal.appendChild(favButton);
-          imageModal.appendChild(linkButton);
-          imageDiv.appendChild(imageModal);
-          imageDiv.appendChild(image);
-          gifDisplay.appendChild(imageDiv);
-          gifInfos.push({
-            id: data.data[i].id,
-            href: data.data[i].url,
-            src: data.data[i].images.fixed_width.url,
-            alt: data.data[i].slug
-          });
-        }
-        var nbrResults = document.createElement('p').createTextNode(data.data.length + " results");
-        var nbrResultElement = document.querySelector(".nbrResults");
-        nbrResultElement.appendChild(nbrResults);
-      } else {
-        console.log("Aucun resultat");
+    return response.json();
+  }).then(function (data) {
+    if (data.data.length) {
+      while (gifDisplay.firstChild) {
+        gifDisplay.removeChild(gifDisplay.firstChild);
       }
-    });
+      for (var i = 0; i < data.data.length; i++) {
+        var imageDiv = document.createElement("div");
+        var image = document.createElement("img");
+        var imageModal = document.createElement("div");
+        var favButton = document.createElement("p");
+        var favText = document.createTextNode("");
+        var linkButton = document.createElement("a");
+        var linkText = document.createTextNode("Link");
+        linkButton.setAttribute("href", data.data[i].url);
+        imageDiv.setAttribute("class", "imageContainer");
+        imageDiv.setAttribute("id", data.data[i].id);
+        imageModal.setAttribute("class", "imgModal");
+        favButton.setAttribute("class", data.data[i].id + " favBtn");
+        image.setAttribute("src", data.data[i].images.fixed_width.url);
+        image.setAttribute("class", data.data[i].id);
+        image.setAttribute("alt", data.data[i].slug);
+        favButton.appendChild(favText);
+        linkButton.appendChild(linkText);
+        imageModal.appendChild(favButton);
+        imageModal.appendChild(linkButton);
+        imageDiv.appendChild(imageModal);
+        imageDiv.appendChild(image);
+        gifDisplay.appendChild(imageDiv);
+        gifInfos.push({
+          id: data.data[i].id,
+          href: data.data[i].url,
+          src: data.data[i].images.fixed_width.url,
+          alt: data.data[i].slug
+        });
+      }
+    } else {
+      return Promise.reject("Aucun resultat");
+    }
+    var nbrResults = document.createElement("p");
+    var nbrResultsText = document.createTextNode(data.data.length + " results");
+    nbrResults.appendChild(nbrResultsText);
+    var nbrResultElement = document.querySelector(".nbrResults");
+    nbrResultElement.appendChild(nbrResults);
+    if (localStorage.length > 0) {
+      for (var _i = 0; _i < localStorage.length; _i++) {
+        var favoritedGifId = localStorage.key(_i);
+        var favoritedGif = document.getElementById(favoritedGifId);
+        favoritedGif.querySelector('img').classList.add("favorited");
+      }
+    }
   }).catch(function (error) {
     return console.log(error);
   });
@@ -159,9 +176,8 @@ searching = function searching(searchedText, e) {
 
 //Add to favorite
 gifDisplay.addEventListener("click", function (e) {
-  var favId = e.target.getAttribute("class");
+  var favId = e.target.getAttribute("class").split(" ")[0];
   var favImg = document.getElementsByClassName(favId)[1];
-  var favUrl = document.getElementsByClassName(favId)[0].getAttribute("src");
   var favs = localStorage.getItem(favId);
   if (favId !== undefined) {
     if (favs !== null) {
@@ -183,7 +199,7 @@ gifDisplay.addEventListener("click", function (e) {
 });
 
 favoritedBtn.addEventListener("click", function (e) {
-  history.pushState(null, '', '/favorited');
+  history.pushState(null, "", "/favorited");
   while (gifDisplay.firstChild) {
     gifDisplay.removeChild(gifDisplay.firstChild);
   }
@@ -198,7 +214,7 @@ function favorited() {
     var image = document.createElement("img");
     var imageModal = document.createElement("div");
     var favButton = document.createElement("p");
-    var favText = document.createTextNode("fav");
+    var favText = document.createTextNode("");
     var linkButton = document.createElement("a");
     var linkText = document.createTextNode("Link");
     var FavGifInfos = JSON.parse(objectGif);
@@ -206,7 +222,7 @@ function favorited() {
     imageDiv.setAttribute("id", FavGifInfos.id);
     imageDiv.setAttribute("class", "imageContainer");
     imageModal.setAttribute("class", "imgModal");
-    favButton.setAttribute("class", favItemId);
+    favButton.setAttribute("class", favItemId + " favBtn");
     image.setAttribute("src", FavGifInfos.src);
     image.setAttribute("class", favItemId + " favorited");
     image.setAttribute("alt", FavGifInfos.alt);
@@ -219,7 +235,9 @@ function favorited() {
     gifDisplay.appendChild(imageDiv);
   }
 }
-},{}],13:[function(require,module,exports) {
+
+function favoritedGifBorder() {}
+},{"./toto":22}],21:[function(require,module,exports) {
 
 var global = (1, eval)('this');
 var OldModule = module.bundle.Module;
@@ -241,7 +259,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '53109' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '60833' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -342,5 +360,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.require, id);
   });
 }
-},{}]},{},[13,6])
+},{}]},{},[21,6])
 //# sourceMappingURL=/dist/giphyapp.map
