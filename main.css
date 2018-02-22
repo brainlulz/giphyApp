@@ -35,6 +35,8 @@ body {
 }
 
 .favBtn {
+  background-color: transparent;
+  border: none;
   background-image: url("https://image.noelshack.com/fichiers/2018/08/3/1519202082-export-2.png");
   display: inline-block;
   width: 3rem;

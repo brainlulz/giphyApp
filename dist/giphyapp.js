@@ -71,32 +71,78 @@ require = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({22:[function(require,module,exports) {
-alert('TOTO');
+})({12:[function(require,module,exports) {
+
+},{}],11:[function(require,module,exports) {
+
+},{}],13:[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+  renderedGif: function renderedGif(gifInfos) {
+    var imageDiv = document.createElement("div");
+    var image = document.createElement("img");
+    var imageModal = document.createElement("div");
+    var favButton = document.createElement("button");
+    var linkButton = document.createElement("a");
+    var linkText = document.createTextNode("Link");
+    linkButton.setAttribute("href", gifInfos.url);
+    imageDiv.setAttribute("class", "imageContainer");
+    imageDiv.setAttribute("id", gifInfos.id);
+    imageModal.setAttribute("class", "imgModal");
+    favButton.setAttribute("class", gifInfos.id + " favBtn");
+    image.setAttribute("src", gifInfos.images.fixed_width.url);
+    image.setAttribute("class", gifInfos.id);
+    image.setAttribute("alt", gifInfos.slug);
+    linkButton.appendChild(linkText);
+    imageModal.appendChild(favButton);
+    imageModal.appendChild(linkButton);
+    imageDiv.appendChild(imageModal);
+    imageDiv.appendChild(image);
+    return imageDiv;
+  }
+};
 },{}],6:[function(require,module,exports) {
 "use strict";
 
-require("./toto");
+var _controllers = require("./controllers");
+
+var _controllers2 = _interopRequireDefault(_controllers);
+
+var _models = require("./models");
+
+var _models2 = _interopRequireDefault(_models);
+
+var _views = require("./views");
+
+var _views2 = _interopRequireDefault(_views);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var giphyUrl = "http://api.giphy.com/v1/gifs/search?q";
 var apikey = "vw4usscjAkDQiPbUvnGdRJfpEUWqZsuY";
 
 var urlParams = new URLSearchParams(window.location.search);
-var urlParam = urlParams.get("q");
+var searchedQuery = urlParams.get("q");
 
 var formElement = document.querySelector("#form");
 var gifDisplay = document.querySelector(".results");
 var favoritedBtn = document.querySelector(".favoris");
 var gifInfos = [];
+var gifResults = [];
+var favoritedGifs = [];
 
 //Loading
 window.onload = function (e) {
   if (window.location.pathname === "/favorited") {
-    favorited();
+    /* favorited(); */
   } else {
-    if (urlParam) {
-      searching(urlParam, e);
-      formElement.querySelector("input").setAttribute("value", urlParam);
+    if (searchedQuery) {
+      searching(searchedQuery, e);
+      formElement.querySelector("input").setAttribute("value", searchedQuery);
     }
   }
 };
@@ -104,70 +150,52 @@ window.onload = function (e) {
 //search
 formElement.addEventListener("submit", function (e) {
   var inputText = e.target[1].value;
-  history.pushState(null, "", "/");
+
   searching(inputText, e);
-  if (urlParam != null) {
+  history.pushState(null, "", "/");
+  if (searchedQuery != null) {
     urlParams.set("q", inputText);
-    window.location.search = "?q=" + inputText;
+    history.pushState(null, "", "?q=" + inputText);
   } else {
-    window.location.href += "?q=" + inputText;
+    history.pushState(null, "", "?q=" + inputText);
   }
 });
 
-searching = function searching(searchedText, e) {
+var searching = function searching(searchedText, e) {
   var url = giphyUrl + "=" + searchedText + "&api_key=" + apikey;
   fetch(url).then(function (response) {
     return response.json();
   }).then(function (data) {
-    if (data.data.length) {
-      while (gifDisplay.firstChild) {
-        gifDisplay.removeChild(gifDisplay.firstChild);
-      }
-      for (var i = 0; i < data.data.length; i++) {
-        var imageDiv = document.createElement("div");
-        var image = document.createElement("img");
-        var imageModal = document.createElement("div");
-        var favButton = document.createElement("p");
-        var favText = document.createTextNode("");
-        var linkButton = document.createElement("a");
-        var linkText = document.createTextNode("Link");
-        linkButton.setAttribute("href", data.data[i].url);
-        imageDiv.setAttribute("class", "imageContainer");
-        imageDiv.setAttribute("id", data.data[i].id);
-        imageModal.setAttribute("class", "imgModal");
-        favButton.setAttribute("class", data.data[i].id + " favBtn");
-        image.setAttribute("src", data.data[i].images.fixed_width.url);
-        image.setAttribute("class", data.data[i].id);
-        image.setAttribute("alt", data.data[i].slug);
-        favButton.appendChild(favText);
-        linkButton.appendChild(linkText);
-        imageModal.appendChild(favButton);
-        imageModal.appendChild(linkButton);
-        imageDiv.appendChild(imageModal);
-        imageDiv.appendChild(image);
-        gifDisplay.appendChild(imageDiv);
-        gifInfos.push({
-          id: data.data[i].id,
-          href: data.data[i].url,
-          src: data.data[i].images.fixed_width.url,
-          alt: data.data[i].slug
-        });
-      }
+    while (gifDisplay.firstChild) {
+      gifDisplay.removeChild(gifDisplay.firstChild);
+    }
+    var recievedData = data.data;
+    gifResults = recievedData;
+    if (recievedData.length) {
+      gifResults = recievedData;
+      var fragment = document.createDocumentFragment();
+      recievedData.forEach(function (gifInfos) {
+        fragment.appendChild(_views2.default.renderedGif(gifInfos));
+      });
+      gifDisplay.appendChild(fragment);
     } else {
       return Promise.reject("Aucun resultat");
     }
-    var nbrResults = document.createElement("p");
-    var nbrResultsText = document.createTextNode(data.data.length + " results");
+    /* let nbrResults = document.createElement("p");
+    let nbrResultsText = document.createTextNode(
+      `${recievedData.length} results`
+    );
     nbrResults.appendChild(nbrResultsText);
-    var nbrResultElement = document.querySelector(".nbrResults");
-    nbrResultElement.appendChild(nbrResults);
-    if (localStorage.length > 0) {
-      for (var _i = 0; _i < localStorage.length; _i++) {
-        var favoritedGifId = localStorage.key(_i);
-        var favoritedGif = document.getElementById(favoritedGifId);
+    let nbrResultElement = document.querySelector(".nbrResults");
+    nbrResultElement.appendChild(nbrResults); */
+
+    /* if (localStorage.length > 0) {
+      for (let i = 0; i < localStorage.length; i++) {
+        let favoritedGifId = localStorage.key(i);
+        let favoritedGif = document.getElementById(favoritedGifId);
         favoritedGif.querySelector('img').classList.add("favorited");
       }
-    }
+    } */
   }).catch(function (error) {
     return console.log(error);
   });
@@ -176,26 +204,31 @@ searching = function searching(searchedText, e) {
 
 //Add to favorite
 gifDisplay.addEventListener("click", function (e) {
-  var favId = e.target.getAttribute("class").split(" ")[0];
+  var favId = e.target.classList.item(0);
   var favImg = document.getElementsByClassName(favId)[1];
-  var favs = localStorage.getItem(favId);
-  if (favId !== undefined) {
-    if (favs !== null) {
+  var allGifsFav = JSON.parse(localStorage.getItem("gifs"));
+
+  if (allGifsFav !== null) {
+    var alreadyFav = false;
+    if (alreadyFav === false) {
+      favoritedGifs.push(gifResults.filter(function (gif) {
+        return gif.id === favId;
+      }));
+      favImg.classList.add("favorited");
+    } else {
       if (window.location.pathname === "/favorited") {
         var rmvGif = document.getElementById(favId);
         gifDisplay.removeChild(rmvGif);
       }
-      localStorage.removeItem(favId);
-      favImg.classList.remove("favorited");
-    } else {
-      for (var i = 0; i < gifInfos.length; i++) {
-        if (favId == gifInfos[i].id) {
-          localStorage.setItem(favId, JSON.stringify(gifInfos[i]));
-          favImg.classList.add("favorited");
-        }
-      }
+      //remove item from favoritedGifs
     }
+  } else {
+    favoritedGifs.push(gifResults.filter(function (gif) {
+      return gif.id === favId;
+    }));
+    favImg.classList.add("favorited");
   }
+  localStorage.setItem("gifs", JSON.stringify(favoritedGifs));
 });
 
 favoritedBtn.addEventListener("click", function (e) {
@@ -203,41 +236,19 @@ favoritedBtn.addEventListener("click", function (e) {
   while (gifDisplay.firstChild) {
     gifDisplay.removeChild(gifDisplay.firstChild);
   }
-  favorited();
-});
-
-function favorited() {
-  for (var i = 0; i < localStorage.length; i++) {
-    var favItemId = localStorage.key(i);
-    var objectGif = localStorage.getItem(favItemId);
-    var imageDiv = document.createElement("div");
-    var image = document.createElement("img");
-    var imageModal = document.createElement("div");
-    var favButton = document.createElement("p");
-    var favText = document.createTextNode("");
-    var linkButton = document.createElement("a");
-    var linkText = document.createTextNode("Link");
-    var FavGifInfos = JSON.parse(objectGif);
-    linkButton.setAttribute("href", FavGifInfos.href);
-    imageDiv.setAttribute("id", FavGifInfos.id);
-    imageDiv.setAttribute("class", "imageContainer");
-    imageModal.setAttribute("class", "imgModal");
-    favButton.setAttribute("class", favItemId + " favBtn");
-    image.setAttribute("src", FavGifInfos.src);
-    image.setAttribute("class", favItemId + " favorited");
-    image.setAttribute("alt", FavGifInfos.alt);
-    favButton.appendChild(favText);
-    linkButton.appendChild(linkText);
-    imageModal.appendChild(favButton);
-    imageModal.appendChild(linkButton);
-    imageDiv.appendChild(imageModal);
-    imageDiv.appendChild(image);
-    gifDisplay.appendChild(imageDiv);
+  var allGifsFav = JSON.parse(localStorage.getItem("gifs"));
+  var fragment = document.createDocumentFragment();
+  allGifsFav.forEach(function (gifInfos) {
+    fragment.appendChild(_views2.default.renderedGif(gifInfos));
+  });
+  gifDisplay.appendChild(fragment);
+  /*  const fragment = document.createDocumentFragment();
+  for(data of localTest) {
+    fragment.appendChild(views.renderedGif(data));
   }
-}
-
-function favoritedGifBorder() {}
-},{"./toto":22}],21:[function(require,module,exports) {
+  gifDisplay.appendChild(fragment); */
+});
+},{"./controllers":12,"./models":11,"./views":13}],28:[function(require,module,exports) {
 
 var global = (1, eval)('this');
 var OldModule = module.bundle.Module;
@@ -259,7 +270,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '60833' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '56023' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -360,5 +371,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.require, id);
   });
 }
-},{}]},{},[21,6])
+},{}]},{},[28,6])
 //# sourceMappingURL=/dist/giphyapp.map
