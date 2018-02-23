@@ -71,11 +71,11 @@ require = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({12:[function(require,module,exports) {
+})({6:[function(require,module,exports) {
 
-},{}],11:[function(require,module,exports) {
+},{}],7:[function(require,module,exports) {
 
-},{}],13:[function(require,module,exports) {
+},{}],8:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -105,7 +105,7 @@ exports.default = {
     return imageDiv;
   }
 };
-},{}],6:[function(require,module,exports) {
+},{}],3:[function(require,module,exports) {
 "use strict";
 
 var _controllers = require("./controllers");
@@ -210,26 +210,68 @@ gifDisplay.addEventListener("click", function (e) {
 
   if (allGifsFav !== null) {
     var alreadyFav = false;
-    if (alreadyFav === false) {
-      favoritedGifs.push(gifResults.filter(function (gif) {
-        return gif.id === favId;
-      }));
-      favImg.classList.add("favorited");
-    } else {
-      if (window.location.pathname === "/favorited") {
-        var rmvGif = document.getElementById(favId);
-        gifDisplay.removeChild(rmvGif);
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = allGifsFav[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var gifs = _step.value;
+
+        if (gifs.id === favId) {
+          alreadyFav = true;
+        }
       }
-      //remove item from favoritedGifs
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+
+    if (alreadyFav === false) {
+      addFavorite(favId, favImg);
+    } else {
+      deleteFavorite(favId, favImg, allGifsFav);
     }
   } else {
-    favoritedGifs.push(gifResults.filter(function (gif) {
-      return gif.id === favId;
-    }));
-    favImg.classList.add("favorited");
+    addFavorite(favId, favImg);
   }
-  localStorage.setItem("gifs", JSON.stringify(favoritedGifs));
 });
+
+function addFavorite(favId, favImg) {
+  var gif = gifResults.find(function (gif) {
+    return gif.id === favId;
+  });
+  favoritedGifs.push(gif);
+  favImg.classList.add("favorited");
+  saveFavorite(favoritedGifs);
+}
+
+function deleteFavorite(favId, favImg, allGifsFav) {
+  if (window.location.pathname === "/favorited") {
+    var rmvGif = document.getElementById(favId);
+    gifDisplay.removeChild(rmvGif);
+  }
+  var gif = allGifsFav.find(function (gif) {
+    return gif.id === favId;
+  });
+  var gifIndex = allGifsFav.indexOf(gif);
+  favoritedGifs = allGifsFav.slice(gifIndex, 1);
+  favImg.classList.remove("favorited");
+}
+
+function saveFavorite(favoritedGifs) {
+  localStorage.setItem("gifs", JSON.stringify(favoritedGifs));
+}
 
 favoritedBtn.addEventListener("click", function (e) {
   history.pushState(null, "", "/favorited");
@@ -242,13 +284,8 @@ favoritedBtn.addEventListener("click", function (e) {
     fragment.appendChild(_views2.default.renderedGif(gifInfos));
   });
   gifDisplay.appendChild(fragment);
-  /*  const fragment = document.createDocumentFragment();
-  for(data of localTest) {
-    fragment.appendChild(views.renderedGif(data));
-  }
-  gifDisplay.appendChild(fragment); */
 });
-},{"./controllers":12,"./models":11,"./views":13}],28:[function(require,module,exports) {
+},{"./controllers":6,"./models":7,"./views":8}],19:[function(require,module,exports) {
 
 var global = (1, eval)('this');
 var OldModule = module.bundle.Module;
@@ -270,7 +307,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '56023' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '49589' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -371,5 +408,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.require, id);
   });
 }
-},{}]},{},[28,6])
+},{}]},{},[19,3])
 //# sourceMappingURL=/dist/giphyapp.map

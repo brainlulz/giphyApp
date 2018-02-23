@@ -1,5 +1,3 @@
-import controllers from "./controllers";
-import models from "./models";
 import views from "./views";
 
 const giphyUrl = "http://api.giphy.com/v1/gifs/search?q";
@@ -91,22 +89,42 @@ gifDisplay.addEventListener("click", e => {
 
   if (allGifsFav !== null) {
     let alreadyFav = false;
-    if (alreadyFav === false) {
-      favoritedGifs.push(gifResults.filter(gif => gif.id === favId));
-      favImg.classList.add("favorited");
-    } else {
-      if (window.location.pathname === "/favorited") {
-        let rmvGif = document.getElementById(favId);
-        gifDisplay.removeChild(rmvGif);
+    for (let gifs of allGifsFav) {
+      if (gifs.id === favId) {
+        alreadyFav = true;
       }
-      //remove item from favoritedGifs
+    }
+    if (alreadyFav === false) {
+      addFavorite(favId, favImg);
+    } else {
+      deleteFavorite(favId, favImg, allGifsFav);
     }
   } else {
-    favoritedGifs.push(gifResults.filter(gif => gif.id === favId));
-    favImg.classList.add("favorited");
+    addFavorite(favId, favImg);
   }
-  localStorage.setItem("gifs", JSON.stringify(favoritedGifs));
 });
+
+function addFavorite(favId, favImg) {
+  const gif = gifResults.find(gif => gif.id === favId);
+  favoritedGifs.push(gif);
+  favImg.classList.add("favorited");
+  saveFavorite(favoritedGifs);
+}
+
+function deleteFavorite(favId, favImg, allGifsFav) {
+  if (window.location.pathname === "/favorited") {
+    let rmvGif = document.getElementById(favId);
+    gifDisplay.removeChild(rmvGif);
+  }
+  const gif = allGifsFav.find(gif => gif.id === favId);
+  const gifIndex = allGifsFav.indexOf(gif);
+  favoritedGifs = allGifsFav.slice(gifIndex, 1);
+  favImg.classList.remove("favorited");
+}
+
+function saveFavorite(favoritedGifs) {
+  localStorage.setItem("gifs", JSON.stringify(favoritedGifs));
+}
 
 favoritedBtn.addEventListener("click", e => {
   history.pushState(null, "", "/favorited");
@@ -119,9 +137,4 @@ favoritedBtn.addEventListener("click", e => {
     fragment.appendChild(views.renderedGif(gifInfos));
   });
   gifDisplay.appendChild(fragment);
-  /*  const fragment = document.createDocumentFragment();
-  for(data of localTest) {
-    fragment.appendChild(views.renderedGif(data));
-  }
-  gifDisplay.appendChild(fragment); */
 });
